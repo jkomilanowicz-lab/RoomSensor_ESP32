@@ -4,7 +4,7 @@ esphome:
   comment: "Azure Forest ESP32 HA Board V1.0 | AHT20 + LD2410C | Designed by Jack Omilanowicz"
   project:
     name: "Azure Forest.RoomSensor_ESP32"
-    version: "1.0.6"
+    version: "1.0.7"
   # Larger app partition – needed for BLE + HTTP + update components
   # min_spiffs: 1.93MB app (vs default 1.79MB), keeps both OTA slots, reduces unused SPIFFS
   platformio_options:
@@ -117,11 +117,13 @@ sensor:
       unit_of_measurement: "°C"
       accuracy_decimals: 1
       filters:
-        - offset: -7.0
+        - lambda: return x + id(temp_offset_number).state;
     humidity:
       name: "Room Humidity"
       unit_of_measurement: "%"
       accuracy_decimals: 1
+      filters:
+        - lambda: return x + id(humidity_offset_number).state;
     update_interval: 30s
 
   # LD2410C – Distance & Energy readings
@@ -271,9 +273,40 @@ switch:
       entity_category: config
 
 # ──────────────────────────────────────────────
-# LD2410C Calibration Controls
+# AHT20 Calibration Controls
 # ──────────────────────────────────────────────
 number:
+  # Temperature offset – compensates for ESP32 self-heating (default -7.0°C)
+  - platform: template
+    name: "Temperature Offset"
+    id: temp_offset_number
+    min_value: -20.0
+    max_value: 20.0
+    step: 0.1
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer-lines"
+    entity_category: config
+    restore_value: true
+    initial_value: -7.0
+    optimistic: true
+
+  # Humidity offset – fine-tune with a reference hygrometer (default 0%)
+  - platform: template
+    name: "Humidity Offset"
+    id: humidity_offset_number
+    min_value: -20.0
+    max_value: 20.0
+    step: 0.5
+    unit_of_measurement: "%"
+    icon: "mdi:water-percent"
+    entity_category: config
+    restore_value: true
+    initial_value: 0.0
+    optimistic: true
+
+# ──────────────────────────────────────────────
+# LD2410C Calibration Controls
+# ──────────────────────────────────────────────
   - platform: ld2410
     timeout:
       name: "Detection Timeout"
