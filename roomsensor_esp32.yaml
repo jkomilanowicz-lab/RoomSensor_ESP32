@@ -58,8 +58,8 @@ esp32_improv_ble:
 dashboard_import:
   package_import_url: github://jkomilanowicz-lab/RoomSensor_ESP32/roomsensor_esp32.yaml@main
 
-# I2C bus – AHT10 Temperature & Humidity Sensor
-# SDA → GPIO21, SCL → GPIO23
+# I2C bus – AHT20 Temperature & Humidity Sensor
+# SDA → GPIO21, SCL → GPIO22
 i2c:
   sda: GPIO21
   scl: GPIO22
@@ -68,8 +68,8 @@ i2c:
   id: bus_i2c
 
 # UART – LD2410C Human Presence Radar
-# ESP TX (GPIO5)  → LD2410C RX
-# ESP RX (GPIO17) ← LD2410C TX
+# ESP TX (GPIO17) → LD2410C RX
+# ESP RX (GPIO16) ← LD2410C TX
 # Baud: 256000 (LD2410C default)
 uart:
   id: uart_ld2410
@@ -193,7 +193,6 @@ text_sensor:
 
   - platform: uptime
     name: "Uptime"
-    format: "%dd %Hh %Mm"
 
   - platform: wifi_info
     ip_address:
