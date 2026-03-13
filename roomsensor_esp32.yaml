@@ -4,7 +4,7 @@ esphome:
   comment: "Azure Forest ESP32 HA Board V1.0 | AHT20 + LD2410C | Designed by Jack Omilanowicz"
   project:
     name: "Azure Forest.RoomSensor_ESP32"
-    version: "1.0.5"
+    version: "1.0.6"
   # Larger app partition – needed for BLE + HTTP + update components
   # min_spiffs: 1.93MB app (vs default 1.79MB), keeps both OTA slots, reduces unused SPIFFS
   platformio_options:
@@ -139,6 +139,52 @@ sensor:
     detection_distance:
       name: "LD2410 Detection Distance"
       unit_of_measurement: "cm"
+    # Engineering mode – per-gate energy (active when Engineering Mode switch is ON)
+    g0:
+      move_energy:
+        name: "Gate 0 Move Energy"
+      still_energy:
+        name: "Gate 0 Still Energy"
+    g1:
+      move_energy:
+        name: "Gate 1 Move Energy"
+      still_energy:
+        name: "Gate 1 Still Energy"
+    g2:
+      move_energy:
+        name: "Gate 2 Move Energy"
+      still_energy:
+        name: "Gate 2 Still Energy"
+    g3:
+      move_energy:
+        name: "Gate 3 Move Energy"
+      still_energy:
+        name: "Gate 3 Still Energy"
+    g4:
+      move_energy:
+        name: "Gate 4 Move Energy"
+      still_energy:
+        name: "Gate 4 Still Energy"
+    g5:
+      move_energy:
+        name: "Gate 5 Move Energy"
+      still_energy:
+        name: "Gate 5 Still Energy"
+    g6:
+      move_energy:
+        name: "Gate 6 Move Energy"
+      still_energy:
+        name: "Gate 6 Still Energy"
+    g7:
+      move_energy:
+        name: "Gate 7 Move Energy"
+      still_energy:
+        name: "Gate 7 Still Energy"
+    g8:
+      move_energy:
+        name: "Gate 8 Move Energy"
+      still_energy:
+        name: "Gate 8 Still Energy"
 
   # Wi-Fi signal strength
   - platform: wifi_signal
@@ -214,6 +260,90 @@ switch:
     id: blue_led
     icon: "mdi:led-on"
     restore_mode: ALWAYS_OFF
+
+  # LD2410C switches
+  - platform: ld2410
+    engineering_mode:
+      name: "Engineering Mode"
+      entity_category: config
+    bluetooth:
+      name: "LD2410 Bluetooth"
+      entity_category: config
+
+# ──────────────────────────────────────────────
+# LD2410C Calibration Controls
+# ──────────────────────────────────────────────
+number:
+  - platform: ld2410
+    timeout:
+      name: "Detection Timeout"
+      entity_category: config
+    max_move_distance_gate:
+      name: "Max Move Distance Gate"
+      entity_category: config
+    max_still_distance_gate:
+      name: "Max Still Distance Gate"
+      entity_category: config
+    g0:
+      move_threshold:
+        name: "Gate 0 Move Sensitivity"
+      still_threshold:
+        name: "Gate 0 Still Sensitivity"
+    g1:
+      move_threshold:
+        name: "Gate 1 Move Sensitivity"
+      still_threshold:
+        name: "Gate 1 Still Sensitivity"
+    g2:
+      move_threshold:
+        name: "Gate 2 Move Sensitivity"
+      still_threshold:
+        name: "Gate 2 Still Sensitivity"
+    g3:
+      move_threshold:
+        name: "Gate 3 Move Sensitivity"
+      still_threshold:
+        name: "Gate 3 Still Sensitivity"
+    g4:
+      move_threshold:
+        name: "Gate 4 Move Sensitivity"
+      still_threshold:
+        name: "Gate 4 Still Sensitivity"
+    g5:
+      move_threshold:
+        name: "Gate 5 Move Sensitivity"
+      still_threshold:
+        name: "Gate 5 Still Sensitivity"
+    g6:
+      move_threshold:
+        name: "Gate 6 Move Sensitivity"
+      still_threshold:
+        name: "Gate 6 Still Sensitivity"
+    g7:
+      move_threshold:
+        name: "Gate 7 Move Sensitivity"
+      still_threshold:
+        name: "Gate 7 Still Sensitivity"
+    g8:
+      move_threshold:
+        name: "Gate 8 Move Sensitivity"
+      still_threshold:
+        name: "Gate 8 Still Sensitivity"
+
+# ──────────────────────────────────────────────
+# LD2410C Select Controls
+# ──────────────────────────────────────────────
+select:
+  - platform: ld2410
+    distance_resolution:
+      name: "Distance Resolution"
+      entity_category: config
+    baud_rate:
+      name: "Baud Rate"
+      entity_category: config
+    out_pin_level:
+      name: "OUT Pin Level"
+      entity_category: config
 
 # ──────────────────────────────────────────────
 # Text Sensors
