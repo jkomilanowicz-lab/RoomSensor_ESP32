@@ -4,7 +4,12 @@ esphome:
   comment: "Azure Forest ESP32 HA Board V1.0 | AHT20 + LD2410C | Designed by Jack Omilanowicz"
   project:
     name: "Azure Forest.RoomSensor_ESP32"
-    version: "1.0.3"
+    version: "1.0.4"
+  # Larger app partition – needed for BLE + HTTP + update components
+  # min_spiffs: 1.93MB app (vs default 1.79MB), keeps both OTA slots, reduces unused SPIFFS
+  platformio_options:
+    board_build.partitions: min_spiffs.csv
+
   on_boot:
     priority: -100
     then:
@@ -39,6 +44,7 @@ api:
 ota:
   - platform: esphome
     password: !secret ota_password
+  - platform: http_request
 
 # WiFi
 wifi:

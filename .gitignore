@@ -4,8 +4,3 @@ secrets.yaml
 # ESPHome build artifacts
 .esphome/
 build/
-
-# Private project files
-CLAUDE.md
-PROJECT.md
-CHANGELOG.md
