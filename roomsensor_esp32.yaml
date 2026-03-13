@@ -9,6 +9,7 @@ esphome:
     priority: -100
     then:
       - delay: 2s
+      - switch.turn_on: blue_led   # solid on while connecting to WiFi / HA
 
 esp32:
   board: esp32dev
@@ -23,6 +24,16 @@ logger:
 api:
   encryption:
     key: !secret api_encryption_key
+  on_client_connected:
+    then:
+      - repeat:
+          count: 3
+          then:
+            - switch.turn_off: blue_led
+            - delay: 150ms
+            - switch.turn_on: blue_led
+            - delay: 150ms
+      - switch.turn_off: blue_led   # off = fully connected
 
 # OTA updates
 ota:
@@ -43,6 +54,10 @@ wifi:
 
 captive_portal:
 
+# HTTP client (used for firmware update checks)
+http_request:
+  verify_ssl: false
+
 # ──────────────────────────────────────────────
 # Easy provisioning (first-time setup)
 # ──────────────────────────────────────────────
@@ -51,7 +66,7 @@ captive_portal:
 improv_serial:
 
 # Provision WiFi via BLE on first boot (HA detects unconfigured device automatically)
-esp32_improv_ble:
+esp32_improv:
   authorizer: none
 
 # Allow HA's ESPHome dashboard to auto-import this config during device adoption
@@ -164,6 +179,15 @@ bluetooth_proxy:
   active: true
 
 # ──────────────────────────────────────────────
+# Firmware Update Check
+# ──────────────────────────────────────────────
+update:
+  - platform: http_request
+    name: "Firmware Update"
+    source: https://raw.githubusercontent.com/jkomilanowicz-lab/RoomSensor_ESP32/main/version.json
+    update_interval: 6h
+
+# ──────────────────────────────────────────────
 # Buttons
 # ──────────────────────────────────────────────
 button:
@@ -176,12 +200,14 @@ button:
 # Switches
 # ──────────────────────────────────────────────
 switch:
-  # Onboard LED (GPIO2) – toggle from HA
+  # Onboard blue LED (GPIO2) – toggle from HA
+  # Red LED is hardwired to power rail, not GPIO controlled
   - platform: gpio
     pin: GPIO2
-    name: "Onboard LED"
+    name: "Blue LED"
+    id: blue_led
     icon: "mdi:led-on"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
 
 # ──────────────────────────────────────────────
 # Text Sensors
