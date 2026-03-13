@@ -1,0 +1,217 @@
+esphome:
+  name: azureforest-roomsensor-1
+  friendly_name: AzureForest RoomSensor 1
+  comment: "Azure Forest ESP32 HA Board V1.0 | AHT20 + LD2410C | Designed by Jack Omilanowicz"
+  project:
+    name: "Azure Forest.RoomSensor_ESP32"
+    version: "1.0.3"
+  on_boot:
+    priority: -100
+    then:
+      - delay: 2s
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: DEBUG
+
+# Home Assistant native API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+# OTA updates
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+# WiFi
+wifi:
+  # AFIOT (hidden network)
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+      hidden: true
+  # Fallback hotspot if all networks fail – also used by Improv provisioning
+  ap:
+    ssid: "RoomSensor Fallback"
+    password: !secret ap_password
+
+captive_portal:
+
+# ──────────────────────────────────────────────
+# Easy provisioning (first-time setup)
+# ──────────────────────────────────────────────
+
+# Provision WiFi via USB serial (works with HA Improv flow)
+improv_serial:
+
+# Provision WiFi via BLE on first boot (HA detects unconfigured device automatically)
+esp32_improv_ble:
+  authorizer: none
+
+# Allow HA's ESPHome dashboard to auto-import this config during device adoption
+dashboard_import:
+  package_import_url: github://jkomilanowicz-lab/RoomSensor_ESP32/roomsensor_esp32.yaml@main
+
+# I2C bus – AHT10 Temperature & Humidity Sensor
+# SDA → GPIO21, SCL → GPIO23
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+  frequency: 50000
+  id: bus_i2c
+
+# UART – LD2410C Human Presence Radar
+# ESP TX (GPIO5)  → LD2410C RX
+# ESP RX (GPIO17) ← LD2410C TX
+# Baud: 256000 (LD2410C default)
+uart:
+  id: uart_ld2410
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 256000
+  parity: NONE
+  stop_bits: 1
+
+# LD2410C component
+ld2410:
+  uart_id: uart_ld2410
+
+# ──────────────────────────────────────────────
+# Sensors
+# ──────────────────────────────────────────────
+sensor:
+  # AHT10 – Temperature & Humidity
+  - platform: aht10
+    variant: AHT20
+    i2c_id: bus_i2c
+    temperature:
+      name: "Room Temperature"
+      unit_of_measurement: "°C"
+      accuracy_decimals: 1
+      filters:
+        - offset: -7.0
+    humidity:
+      name: "Room Humidity"
+      unit_of_measurement: "%"
+      accuracy_decimals: 1
+    update_interval: 30s
+
+  # LD2410C – Distance & Energy readings
+  - platform: ld2410
+    moving_distance:
+      name: "LD2410 Moving Distance"
+      unit_of_measurement: "cm"
+    still_distance:
+      name: "LD2410 Still Distance"
+      unit_of_measurement: "cm"
+    moving_energy:
+      name: "LD2410 Moving Energy"
+    still_energy:
+      name: "LD2410 Still Energy"
+    detection_distance:
+      name: "LD2410 Detection Distance"
+      unit_of_measurement: "cm"
+
+  # Wi-Fi signal strength
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+
+
+# ──────────────────────────────────────────────
+# Binary Sensors
+# ──────────────────────────────────────────────
+binary_sensor:
+  # LD2410C – Software presence (via UART)
+  - platform: ld2410
+    has_target:
+      name: "Presence Detected"
+      device_class: occupancy
+    has_moving_target:
+      name: "Moving Target"
+      device_class: motion
+    has_still_target:
+      name: "Still Target"
+      device_class: occupancy
+
+  # LD2410C – Hardware OUT pin (GPIO16) – simple high/low presence output
+  - platform: gpio
+    pin:
+      number: GPIO4
+      mode:
+        input: true
+        pulldown: true
+    name: "Presence OUT Pin"
+    device_class: occupancy
+
+# ──────────────────────────────────────────────
+# Bluetooth Proxy
+# ──────────────────────────────────────────────
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true
+
+# ──────────────────────────────────────────────
+# Buttons
+# ──────────────────────────────────────────────
+button:
+  - platform: restart
+    name: "Restart"
+    icon: "mdi:restart"
+    entity_category: config
+
+# ──────────────────────────────────────────────
+# Switches
+# ──────────────────────────────────────────────
+switch:
+  # Onboard LED (GPIO2) – toggle from HA
+  - platform: gpio
+    pin: GPIO2
+    name: "Onboard LED"
+    icon: "mdi:led-on"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+# ──────────────────────────────────────────────
+# Text Sensors
+# ──────────────────────────────────────────────
+text_sensor:
+  - platform: ld2410
+    version:
+      name: "LD2410 Firmware Version"
+
+  - platform: uptime
+    name: "Uptime"
+    format: "%dd %Hh %Mm"
+
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+    ssid:
+      name: "Connected SSID"
+    mac_address:
+      name: "MAC Address"
+
+  # Board identity
+  - platform: template
+    name: "Designed By"
+    lambda: return {"Jack Omilanowicz"};
+    icon: "mdi:account-wrench"
+    entity_category: diagnostic
+
+  - platform: template
+    name: "Board"
+    lambda: return {"Azure Forest ESP32 HA Board V1.0"};
+    icon: "mdi:developer-board"
+    entity_category: diagnostic
