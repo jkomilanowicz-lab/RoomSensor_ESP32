@@ -4,7 +4,7 @@ esphome:
   comment: "Azure Forest ESP32 HA Board V1.0 | AHT20 + LD2410C | Designed by Jack Omilanowicz"
   project:
     name: "Azure Forest.RoomSensor_ESP32"
-    version: "1.0.7"
+    version: "1.0.8"
   # Larger app partition – needed for BLE + HTTP + update components
   # min_spiffs: 1.93MB app (vs default 1.79MB), keeps both OTA slots, reduces unused SPIFFS
   platformio_options:
@@ -70,10 +70,6 @@ http_request:
 
 # Provision WiFi via USB serial (works with HA Improv flow)
 improv_serial:
-
-# Provision WiFi via BLE on first boot (HA detects unconfigured device automatically)
-esp32_improv:
-  authorizer: none
 
 # Allow HA's ESPHome dashboard to auto-import this config during device adoption
 dashboard_import:
@@ -220,17 +216,6 @@ binary_sensor:
     name: "Presence OUT Pin"
     device_class: occupancy
 
-# ──────────────────────────────────────────────
-# Bluetooth Proxy
-# ──────────────────────────────────────────────
-esp32_ble_tracker:
-  scan_parameters:
-    interval: 320ms   # scan every 320ms
-    window: 30ms      # but only for 30ms each time (~9% duty cycle, leaves WiFi room to breathe)
-    active: true
-
-bluetooth_proxy:
-  active: true
 
 # ──────────────────────────────────────────────
 # Firmware Update Check
