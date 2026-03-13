@@ -4,7 +4,7 @@ esphome:
   comment: "Azure Forest ESP32 HA Board V1.0 | AHT20 + LD2410C | Designed by Jack Omilanowicz"
   project:
     name: "Azure Forest.RoomSensor_ESP32"
-    version: "1.0.4"
+    version: "1.0.5"
   # Larger app partition – needed for BLE + HTTP + update components
   # min_spiffs: 1.93MB app (vs default 1.79MB), keeps both OTA slots, reduces unused SPIFFS
   platformio_options:
@@ -177,8 +177,8 @@ binary_sensor:
 # ──────────────────────────────────────────────
 esp32_ble_tracker:
   scan_parameters:
-    interval: 1100ms
-    window: 1100ms
+    interval: 320ms   # scan every 320ms
+    window: 30ms      # but only for 30ms each time (~9% duty cycle, leaves WiFi room to breathe)
     active: true
 
 bluetooth_proxy:

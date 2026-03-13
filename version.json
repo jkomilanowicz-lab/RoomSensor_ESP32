@@ -1,6 +1,6 @@
 {
   "name": "RoomSensor_ESP32",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "summary": "Azure Forest ESP32 HA Board V1.0 – AHT20 + LD2410C + Bluetooth Proxy",
-  "download_url": "https://github.com/jkomilanowicz-lab/RoomSensor_ESP32/releases/download/v1.0.4/firmware.bin"
+  "download_url": "https://github.com/jkomilanowicz-lab/RoomSensor_ESP32/releases/download/v1.0.5/firmware.bin"
 }

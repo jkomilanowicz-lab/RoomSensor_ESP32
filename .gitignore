@@ -5,11 +5,5 @@ secrets.yaml
 .esphome/
 build/
 
-# Private project files (contain MACs, personal paths, credentials)
-CLAUDE.md
-PROJECT.md
-CHANGELOG.md
-release.sh
-
-# PCB schematics – excluded from all git repos
+# PCB schematics – stored locally, backed up via server, excluded from all git repos
 Sensor Project/
