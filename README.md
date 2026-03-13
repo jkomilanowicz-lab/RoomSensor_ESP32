@@ -2,7 +2,7 @@
 
 **ESPHome firmware for the Azure Forest ESP32 HA Board V1.0**
 
-A custom PCB integrating an AHT20 temperature/humidity sensor and LD2410C 24GHz mmWave human presence radar into Home Assistant, with Bluetooth proxy capability.
+A custom PCB integrating an AHT20 temperature/humidity sensor and LD2410C 24GHz mmWave human presence radar into Home Assistant.
 
 > **Note:** This firmware was designed for the Azure Forest ESP32 HA Board V1.0 custom PCB, but it will work equally well on a standard ESP32 development board wired on a breadboard. No code changes are needed — just wire the components to the same GPIO pins listed below.
 
@@ -44,14 +44,14 @@ Wire everything to the GPIO pins listed below and the firmware runs identically.
 
 ## Features
 
-- **Temperature & Humidity** — AHT20 with 30s update interval, -7°C self-heating offset
+- **Temperature & Humidity** — AHT20 with 30s update interval; temperature and humidity offsets adjustable from HA (persist to flash)
 - **Human Presence Radar** — LD2410C moving/still detection, distance and energy sensors
-- **Bluetooth Proxy** — ESP32 acts as a BT/BLE proxy for Home Assistant
-- **LED Status Indicator** — Solid on while connecting, 3 pulses when HA connects, then off
+- **LD2410C Calibration** — All radar tuning controls exposed in HA: per-gate move/still thresholds (g0–g8), max distance gates, detection timeout, distance resolution, baud rate, OUT pin level, engineering mode
+- **LED Status Indicator** — Solid on while connecting, 3 pulses when WiFi connects, then off
 - **LED Control** — Toggle blue LED manually from HA
 - **Restart Button** — Reboot device from HA
 - **Device Info** — Designer, board, uptime, WiFi signal, IP, MAC all exposed in HA
-- **Easy Provisioning** — Improv Serial + Improv BLE for first-time setup without manual config
+- **Easy Provisioning** — Improv Serial for first-time USB setup
 - **OTA Updates** — Flash over WiFi after initial USB flash
 - **Auto Update Notifications** — Device checks GitHub for new firmware every 6h, shows update in HA
 
@@ -92,8 +92,23 @@ python3 -c "import secrets, base64; print(base64.b64encode(secrets.token_bytes(3
 esphome run roomsensor_esp32.yaml --device azureforest-roomsensor-1.local
 ```
 
-### First-Time Setup via BLE (No USB needed after initial flash)
-On first boot with no WiFi configured, open Home Assistant → **Settings → Devices & Services** — the device will appear for adoption. HA will guide you through WiFi provisioning via Bluetooth.
+---
+
+## Calibration
+
+### Temperature & Humidity Offsets
+The AHT20 sensor sits close to the ESP32 which generates heat. A temperature offset is applied to compensate. Both offsets are adjustable directly from Home Assistant (no reflash needed) and persist to flash:
+
+- **Temperature Offset** — default `-7.0°C`. Tune with a reference thermometer.
+- **Humidity Offset** — default `0%`. Tune with a reference hygrometer.
+
+### LD2410C Radar Calibration
+Full per-gate calibration is exposed in HA under the device's config entities:
+
+- **Max Move/Still Distance Gate** — limits detection range (gates × 0.75m each)
+- **Detection Timeout** — how long after last detection before clearing presence
+- **Gate 0–8 Move/Still Threshold** — sensitivity per zone; lower = more sensitive
+- **Engineering Mode** — enables live per-gate energy readout for fine-tuning
 
 ---
 
@@ -104,7 +119,6 @@ On first boot with no WiFi configured, open Home Assistant → **Settings → De
 - **LD2410C UART labels**: PCB labels are from LD2410C's perspective — see wiring note above.
 - **I2C frequency**: 50kHz required for reliable AHT20 operation (default 400kHz causes issues on some modules).
 - **Boot delay**: 2s on_boot delay required for AHT20 initialization.
-- **Temperature offset**: The -7.0°C offset compensates for ESP32 self-heating. Adjust this value in the YAML to match your environment using a reference thermometer.
 
 ---
 
